@@ -1,7 +1,7 @@
-obj-m += prandom.o
+obj-m += gfrandom.o
+gfrandom-objs := prandom.o lib.o
 
 KDIR := /lib/modules/$(shell uname -r)/build
-
 PWD := $(shell pwd)
 
 all:

@@ -1,0 +1,8 @@
+.gfrandom.mod.cmd
+compile_commands.json
+gfrandom.mod
+.cache
+LICENSE
+.clang-format
+lib.c
+lib.h
