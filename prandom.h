@@ -4,7 +4,7 @@
 #ifdef __KERNEL__
 #include <linux/types.h>
 #else
-#include <stddef.h>  // для size_t в userspace
+#include <stddef.h>
 #endif
 #include "lib.h"
 

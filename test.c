@@ -31,13 +31,13 @@ static int test1(void)
 
     if (read_file(coeff_file, coeff, POLY_DEGREE) != 0)
     {
-        printf("  Failed to read %s\n", coeff_file);
+        printf("failed to read %s\n", coeff_file);
         return -1;
     }
 
     if (read_file(poly_file, poly, POLY_DEGREE) != 0)
     {
-        printf("  Failed to read %s\n", poly_file);
+        printf("failed to read %s\n", poly_file);
         return -1;
     }
 
@@ -47,7 +47,7 @@ static int test1(void)
 
     if (read_file(expected_file, expected, NUM_BYTES) != 0)
     {
-        printf("  Failed to read %s\n", expected_file);
+        printf("failed to read %s\n", expected_file);
         return -1;
     }
 
@@ -55,12 +55,12 @@ static int test1(void)
     {
         if (generated[i] != expected[i])
         {
-            printf("  ❌ Byte %d: 0x%02x != 0x%02x\n", i, generated[i], expected[i]);
+            printf("❌ Byte %d: 0x%02x != 0x%02x\n", i, generated[i], expected[i]);
             return -1;
         }
     }
 
-    printf("  ✅ Test 1 passed\n");
+    printf("✅ Test 1 passed\n");
     return 0;
 }
 

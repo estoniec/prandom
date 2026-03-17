@@ -6,3 +6,4 @@ LICENSE
 .clang-format
 lib.c
 lib.h
+test
