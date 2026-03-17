@@ -84,7 +84,7 @@ make test
 
 ## Лицензия
 
-- **prandom**: GPL-3.0-or-later
+- **prandom**: GPL-3.0
 - **lib** (Denis Potapov): MIT License
 
 Подробности см. в [LICENSE](LICENSE).
