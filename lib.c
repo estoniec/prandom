@@ -1,14 +1,19 @@
 
 #include "lib.h"
+#ifdef __KERNEL__
+#include <linux/types.h>
+u16 Module = 0x11B;
+u8 ready_to_work = 0;
+#else
+#include <stdint.h>
+uint16_t Module = 0x11B;
+uint8_t ready_to_work = 0;
+#endif
 
 #define ORDER 256
 
-uint16_t Module = 0x11B;
-
 GF256_t alogs[ORDER];
 GF256_t logs[ORDER];
-
-u8 ready_to_work = 0;
 
 void GF256_init(void)
 {
@@ -20,7 +25,7 @@ void GF256_init(void)
         alogs[i] = x;
         logs[x]  = i;
 
-        u16 prod = x << 1;
+        uint16_t prod = x << 1;
         if (prod & 0x100)
         {
             prod ^= Module;
@@ -56,11 +61,11 @@ GF256_t GF256_Mul(GF256_t a, GF256_t b)
         return 0;
     }
 
-    u8 log_a = logs[a];
-    u8 log_b = logs[b];
+    uint8_t log_a = logs[a];
+    uint8_t log_b = logs[b];
 
-    u8 sum = 0;
-    if ((u8)(ORDER - 1) - log_a < log_b)
+    uint8_t sum = 0;
+    if ((uint8_t)(ORDER - 1) - log_a < log_b)
     {
         sum = log_a - (ORDER - 1 - log_b);
     }
