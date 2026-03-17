@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,16 +19,16 @@ static int read_file(const char* path, unsigned char* buf, size_t size)
     return (read == size) ? 0 : -1;
 }
 
-static int test1(void)
+static int test1_simple(void)
 {
-    const char* coeff_file    = "test-files/coeff_file.bin";
-    const char* poly_file     = "test-files/polynom_file.bin";
-    const char* expected_file = "test-files/expected1.bin";
+    const char* coeff_file    = "assets/coeff_file.bin";
+    const char* poly_file     = "assets/polynom_file.bin";
+    const char* expected_file = "assets/expected1.bin";
 
-    unsigned char coeff[POLY_DEGREE];
-    unsigned char poly[POLY_DEGREE];
-    unsigned char generated[NUM_BYTES];
-    unsigned char expected[NUM_BYTES];
+    GF256_t coeff[POLY_DEGREE];
+    GF256_t poly[POLY_DEGREE];
+    GF256_t generated[NUM_BYTES];
+    GF256_t expected[NUM_BYTES];
 
     if (read_file(coeff_file, coeff, POLY_DEGREE) != 0)
     {
@@ -42,8 +43,8 @@ static int test1(void)
     }
 
     struct gf256_gprn gprn;
-    gf256_gprn_init_t(&gprn, (GF256_t*)coeff, (GF256_t*)poly);
-    gf256_gprn_generate(&gprn, NUM_BYTES, (GF256_t*)generated);
+    gf256_gprn_init_t(&gprn, coeff, poly);
+    gf256_gprn_generate(&gprn, NUM_BYTES, generated);
 
     if (read_file(expected_file, expected, NUM_BYTES) != 0)
     {
@@ -64,14 +65,59 @@ static int test1(void)
     return 0;
 }
 
+static int test2_without_polynom(void)
+{
+    const char* coeff_file    = "assets/coeff_file.bin";
+    const char* expected_file = "assets/expected1.bin";
+
+    GF256_t coeff[POLY_DEGREE];
+    GF256_t generated[NUM_BYTES];
+    GF256_t expected[NUM_BYTES];
+
+    if (read_file(coeff_file, coeff, POLY_DEGREE) != 0)
+    {
+        printf("failed to read %s\n", coeff_file);
+        return -1;
+    }
+
+    struct gf256_gprn gprn;
+    gf256_gprn_init_t(&gprn, coeff, NULL);
+    gf256_gprn_generate(&gprn, NUM_BYTES, generated);
+
+    if (read_file(expected_file, expected, NUM_BYTES) != 0)
+    {
+        printf("failed to read %s\n", expected_file);
+        return -1;
+    }
+
+    for (int i = 0; i < NUM_BYTES; i++)
+    {
+        if (generated[i] != expected[i])
+        {
+            printf("❌ Byte %d: 0x%02x != 0x%02x\n", i, generated[i], expected[i]);
+            return -1;
+        }
+    }
+
+    printf("✅ Test 2 passed\n");
+    return 0;
+}
+
 int main(void)
 {
     int result = 0;
 
-    result = test1();
+    result = test1_simple();
     if (result != 0)
     {
         printf("test1 failed\n");
+        return 1;
+    }
+
+    result = test2_without_polynom();
+    if (result != 0)
+    {
+        printf("test2 failed\n");
         return 1;
     }
 

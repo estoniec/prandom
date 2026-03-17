@@ -2,6 +2,12 @@
 #define PRANDOM_H
 
 #ifdef __KERNEL__
+#include <linux/string.h>
+#else
+#include <string.h>
+#endif
+
+#ifdef __KERNEL__
 #include <linux/types.h>
 #else
 #include <stddef.h>
@@ -13,7 +19,7 @@
 #endif
 #define POLY_DEGREE 256
 #define GF256_ONE (GF256_t)0x01
-#define GF256_DEGREES_AUTO {0, 2, 5, 10, 255}
+static const int GF256_DEGREES_AUTO[] = {0, 2, 5, 10, 255};
 
 struct gf256_gprn
 {

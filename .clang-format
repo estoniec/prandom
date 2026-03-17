@@ -1,0 +1,28 @@
+# Стиль форматирования
+BasedOnStyle: Google
+
+# Настройки отступов
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# Разрывы строк
+ColumnLimit: 100
+BreakBeforeBraces: Allman
+
+# Пробелы
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+
+# Выравнивание
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+
+# Указатели и ссылки
+PointerAlignment: Left
+
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+
+# Сортировка
+SortIncludes: true

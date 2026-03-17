@@ -4,16 +4,40 @@
 
 void gf256_gprn_init_t(struct gf256_gprn* gprn, GF256_t* coeff_data, GF256_t* polynom_data)
 {
+    if (!gprn)
+        return;
+
     int i;
 
-    for (i = 0; i < POLY_DEGREE; i++)
+    if (coeff_data)
     {
-        gprn->coeff[i] = coeff_data[i];
+        for (i = 0; i < POLY_DEGREE; i++)
+        {
+            gprn->coeff[i] = coeff_data[i];
+        }
+    }
+    else
+    {
+        for (i = 0; i < POLY_DEGREE; i++)
+        {
+            gprn->coeff[i] = (GF256_t)(i % 256);
+        }
     }
 
-    for (i = 0; i < POLY_DEGREE; i++)
+    if (polynom_data)
     {
-        gprn->t[i] = polynom_data[i];
+        for (i = 0; i < POLY_DEGREE; i++)
+        {
+            gprn->t[i] = polynom_data[i];
+        }
+    }
+    else
+    {
+        memset(gprn->t, 0, POLY_DEGREE);
+        for (i = 0; i < ARRAY_SIZE(GF256_DEGREES_AUTO); i++)
+        {
+            gprn->t[GF256_DEGREES_AUTO[i]] = GF256_ONE;
+        }
     }
 
     gprn->index = 0;
@@ -21,6 +45,9 @@ void gf256_gprn_init_t(struct gf256_gprn* gprn, GF256_t* coeff_data, GF256_t* po
 
 GF256_t gf256_gprn_next(struct gf256_gprn* gprn)
 {
+    if (!gprn)
+        return 0;
+
     GF256_t new_byte = 0;
     int     idx;
     int     i;
@@ -43,6 +70,9 @@ GF256_t gf256_gprn_next(struct gf256_gprn* gprn)
 
 void gf256_gprn_generate(struct gf256_gprn* gprn, size_t count, GF256_t* output)
 {
+    if (!gprn || !output || count == 0)
+        return;
+
     size_t i;
     for (i = 0; i < count; i++)
     {

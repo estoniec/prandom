@@ -22,6 +22,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <linux/errno.h>
 #include <linux/fs.h>
 #include <linux/init.h>
 #include <linux/miscdevice.h>
@@ -30,7 +31,6 @@
 #include <linux/slab.h>
 #include <linux/uaccess.h>
 
-#include "asm-generic/errno-base.h"
 #include "lib.h"
 #include "prandom.h"
 
@@ -64,73 +64,48 @@ static int read_file_bytes(char* filename, GF256_t* row, size_t size)
     return 0;
 }
 
-static void gprn_init_t(struct gf256_gprn* gprn)
+static int gprn_init_t(struct gf256_gprn* gprn)
 {
-    GF256_t  coeff_data[POLY_DEGREE];
-    GF256_t  polynom_data[POLY_DEGREE];
-    GF256_t *coeff_ptr = NULL, *polynom_ptr = NULL;
+    GF256_t coeff_data[POLY_DEGREE];
+    GF256_t polynom_data[POLY_DEGREE];
+    int     i;
+    int     err;
 
-    int i;
-
-    // read bytes from coeff file
     if (coeff_file)
     {
-        int res   = read_file_bytes(coeff_file, coeff_data, sizeof(coeff_data));
-        coeff_ptr = coeff_data;
-        if (res != 0)
-        {
+        err = read_file_bytes(coeff_file, coeff_data, sizeof(coeff_data));
+        if (err != 0)
             goto get_random_coeffs;
-        }
     }
     else
     {
     get_random_coeffs:
         get_random_bytes(coeff_data, sizeof(coeff_data));
-
-        int all_zero = 1;
         for (i = 0; i < POLY_DEGREE; i++)
         {
             if (coeff_data[i] != 0)
-            {
-                all_zero = 0;
                 break;
-            }
         }
-        if (all_zero)
-        {
+        if (i == POLY_DEGREE)
             coeff_data[0] = GF256_ONE;
-        }
-        coeff_ptr = coeff_data;
     }
 
-    // read bytes from polynom file
     if (polynom_file)
     {
-        int res     = read_file_bytes(polynom_file, polynom_data, sizeof(polynom_data));
-        polynom_ptr = polynom_data;
-        if (res != 0)
-        {
-            goto get_auto_polynom;
-        }
+        err = read_file_bytes(polynom_file, polynom_data, sizeof(polynom_data));
+        if (err != 0)
+            goto use_auto_polynom;
     }
     else
     {
-    get_auto_polynom:
-        for (i = 0; i < POLY_DEGREE; i++)
-        {
-            polynom_data[i] = 0;
-        }
-
-        // we use polynom t^256 + t^10 + t^5 + t^2 + 1
-        const int degrees[] = GF256_DEGREES_AUTO;
-        for (i = 0; i < ARRAY_SIZE(degrees); i++)
-        {
-            polynom_data[degrees[i]] = GF256_ONE;
-        }
-        polynom_ptr = polynom_data;
+    use_auto_polynom:
+        memset(polynom_data, 0, sizeof(polynom_data));
+        for (i = 0; i < ARRAY_SIZE(GF256_DEGREES_AUTO); i++)
+            polynom_data[GF256_DEGREES_AUTO[i]] = GF256_ONE;
     }
 
-    gf256_gprn_init_t(gprn, coeff_ptr, polynom_ptr);
+    gf256_gprn_init_t(gprn, coeff_data, polynom_data);
+    return 0;
 }
 
 static ssize_t misc_read(struct file* filp, char __user* buf, size_t length, loff_t* f_pos)
@@ -156,7 +131,7 @@ static ssize_t misc_read(struct file* filp, char __user* buf, size_t length, lof
         *f_pos += chunk;
     }
 
-    return length;
+    return length - bytes_to_read;
 }
 
 static const struct file_operations fops = {
@@ -172,11 +147,15 @@ static struct miscdevice prandom_misc = {
 
 static int __init misc_init(void)
 {
-    global_gprn = kmalloc(sizeof(struct gf256_gprn), GFP_KERNEL);
+    global_gprn = kzalloc(sizeof(struct gf256_gprn), GFP_KERNEL);
     if (!global_gprn)
         return -ENOMEM;
 
-    gprn_init_t(global_gprn);
+    if (gprn_init_t(global_gprn) != 0)
+    {
+        kfree(global_gprn);
+        return -EINVAL;
+    }
 
     int err = misc_register(&prandom_misc);
     if (err != 0)

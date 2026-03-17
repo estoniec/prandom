@@ -1,9 +1,17 @@
+*.o
+*.ko
+*.mod.c
+*.mod
+*.order
+*.symvers
+ Module.symvers
 .gfrandom.mod.cmd
-compile_commands.json
 gfrandom.mod
+compile_commands.json
 .cache
-LICENSE
-.clang-format
-lib.c
-lib.h
+*.swp
+*.swo
+*~
 test
+test_gen
+expected_gen
