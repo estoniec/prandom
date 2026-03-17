@@ -48,7 +48,7 @@ static char* polynom_file = NULL;
 static int read_file_bytes(char* filename, GF256_t* row, size_t size)
 {
     if (!filename || !row)
-        return !EINVAL;
+        return -EINVAL;
 
     struct file* f = filp_open(filename, O_RDONLY, 0);
     if (IS_ERR(f))
@@ -85,7 +85,7 @@ static void gprn_init_t(struct gf256_gprn* gprn)
     else
     {
     get_random_coeffs:
-        get_random_bytes(coeff_data, sizeof(coeff_ptr));
+        get_random_bytes(coeff_data, sizeof(coeff_data));
 
         int all_zero = 1;
         for (i = 0; i < POLY_DEGREE; i++)
