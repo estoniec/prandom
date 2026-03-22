@@ -42,8 +42,8 @@ MODULE_DESCRIPTION("Analogue of /dev/urandom");
 
 struct gf256_gprn* global_gprn = NULL;
 
-static char* coeff_file   = NULL;
-static char* polynom_file = NULL;
+static char* coeff_file = NULL;
+static char* seed_file  = NULL;
 
 static int read_file_bytes(char* filename, GF256_t* row, size_t size)
 {
@@ -67,7 +67,7 @@ static int read_file_bytes(char* filename, GF256_t* row, size_t size)
 static int gprn_init_t(struct gf256_gprn* gprn)
 {
     GF256_t coeff_data[POLY_DEGREE];
-    GF256_t polynom_data[POLY_DEGREE];
+    GF256_t seed_data[POLY_DEGREE];
     int     i;
     int     err;
 
@@ -90,21 +90,21 @@ static int gprn_init_t(struct gf256_gprn* gprn)
             coeff_data[0] = GF256_ONE;
     }
 
-    if (polynom_file)
+    if (seed_file)
     {
-        err = read_file_bytes(polynom_file, polynom_data, sizeof(polynom_data));
+        err = read_file_bytes(seed_file, seed_data, sizeof(seed_data));
         if (err != 0)
             goto use_auto_polynom;
     }
     else
     {
     use_auto_polynom:
-        memset(polynom_data, 0, sizeof(polynom_data));
+        memset(seed_data, 0, sizeof(seed_data));
         for (i = 0; i < ARRAY_SIZE(GF256_DEGREES_AUTO); i++)
-            polynom_data[GF256_DEGREES_AUTO[i]] = GF256_ONE;
+            seed_data[GF256_DEGREES_AUTO[i]] = GF256_ONE;
     }
 
-    gf256_gprn_init_t(gprn, coeff_data, polynom_data);
+    gf256_gprn_init_t(gprn, coeff_data, seed_data);
     return 0;
 }
 
@@ -175,8 +175,8 @@ static void __exit misc_exit(void)
 
 module_param(coeff_file, charp, 0);
 MODULE_PARM_DESC(coeff_file, "path to file with bytes for coefficients");
-module_param(polynom_file, charp, 0);
-MODULE_PARM_DESC(polynom_file, "path to file with bytes for polynom");
+module_param(seed_file, charp, 0);
+MODULE_PARM_DESC(seed_file, "path to file with bytes for polynom");
 
 module_init(misc_init);
 module_exit(misc_exit);

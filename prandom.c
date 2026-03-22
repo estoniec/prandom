@@ -2,7 +2,7 @@
 
 #include "lib.h"
 
-void gf256_gprn_init_t(struct gf256_gprn* gprn, GF256_t* coeff_data, GF256_t* polynom_data)
+void gf256_gprn_init_t(struct gf256_gprn* gprn, GF256_t* coeff_data, GF256_t* seed_data)
 {
     if (!gprn)
         return;
@@ -24,11 +24,11 @@ void gf256_gprn_init_t(struct gf256_gprn* gprn, GF256_t* coeff_data, GF256_t* po
         }
     }
 
-    if (polynom_data)
+    if (seed_data)
     {
         for (i = 0; i < POLY_DEGREE; i++)
         {
-            gprn->t[i] = polynom_data[i];
+            gprn->t[i] = seed_data[i];
         }
     }
     else

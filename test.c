@@ -22,11 +22,11 @@ static int read_file(const char* path, unsigned char* buf, size_t size)
 static int test1_simple(void)
 {
     const char* coeff_file    = "assets/coeff_file.bin";
-    const char* poly_file     = "assets/polynom_file.bin";
+    const char* seed_file     = "assets/seed_file.bin";
     const char* expected_file = "assets/expected1.bin";
 
     GF256_t coeff[POLY_DEGREE];
-    GF256_t poly[POLY_DEGREE];
+    GF256_t seed[POLY_DEGREE];
     GF256_t generated[NUM_BYTES];
     GF256_t expected[NUM_BYTES];
 
@@ -36,14 +36,14 @@ static int test1_simple(void)
         return -1;
     }
 
-    if (read_file(poly_file, poly, POLY_DEGREE) != 0)
+    if (read_file(seed_file, seed, POLY_DEGREE) != 0)
     {
-        printf("failed to read %s\n", poly_file);
+        printf("failed to read %s\n", seed_file);
         return -1;
     }
 
     struct gf256_gprn gprn;
-    gf256_gprn_init_t(&gprn, coeff, poly);
+    gf256_gprn_init_t(&gprn, coeff, seed);
     gf256_gprn_generate(&gprn, NUM_BYTES, generated);
 
     if (read_file(expected_file, expected, NUM_BYTES) != 0)
