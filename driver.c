@@ -94,11 +94,11 @@ static int gprn_init_t(struct gf256_gprn* gprn)
     {
         err = read_file_bytes(seed_file, seed_data, sizeof(seed_data));
         if (err != 0)
-            goto use_auto_polynom;
+            goto use_auto_seed;
     }
     else
     {
-    use_auto_polynom:
+    use_auto_seed:
         memset(seed_data, 0, sizeof(seed_data));
         for (i = 0; i < ARRAY_SIZE(GF256_DEGREES_AUTO); i++)
             seed_data[GF256_DEGREES_AUTO[i]] = GF256_ONE;
@@ -176,7 +176,7 @@ static void __exit misc_exit(void)
 module_param(coeff_file, charp, 0);
 MODULE_PARM_DESC(coeff_file, "path to file with bytes for coefficients");
 module_param(seed_file, charp, 0);
-MODULE_PARM_DESC(seed_file, "path to file with bytes for polynom");
+MODULE_PARM_DESC(seed_file, "path to file with seed bytes");
 
 module_init(misc_init);
 module_exit(misc_exit);

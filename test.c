@@ -65,7 +65,7 @@ static int test1_simple(void)
     return 0;
 }
 
-static int test2_without_polynom(void)
+static int test2_without_seed(void)
 {
     const char* coeff_file    = "assets/coeff_file.bin";
     const char* expected_file = "assets/expected1.bin";
@@ -114,7 +114,7 @@ int main(void)
         return 1;
     }
 
-    result = test2_without_polynom();
+    result = test2_without_seed();
     if (result != 0)
     {
         printf("test2 failed\n");

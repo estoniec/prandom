@@ -61,13 +61,13 @@ sudo insmod gfrandom.ko
 ### Параметры модуля
 
 - `coeff_file` — путь к файлу с коэффициентами (256 байт)
-- `polynom_file` — путь к файлу с полиномом (256 байт)
+- `seed_file` — путь к файлу с seed (256 байт)
 
 Если параметры не указаны, используются автоматически сгенерированные значения.
 
 Пример использования собственных параметров:
 ```bash
-sudo insmod gfrandom.ko coeff_file=/path/to/coeffs.bin polynom_file=/path/to/poly.bin
+sudo insmod gfrandom.ko coeff_file=/path/to/coeffs.bin seed_file=/path/to/seed.bin
 ```
 
 ### Чтение случайных данных
