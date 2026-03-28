@@ -1,6 +1,6 @@
 #include "prandom.h"
 
-#include "lib.h"
+#include "Galois_Field_256.h"
 
 void gf256_gprn_init_t(struct gf256_gprn* gprn, GF256_t* coeff_data, GF256_t* seed_data)
 {

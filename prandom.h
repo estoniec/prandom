@@ -12,7 +12,7 @@
 #else
 #include <stddef.h>
 #endif
-#include "lib.h"
+#include "Galois_Field_256.h"
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))

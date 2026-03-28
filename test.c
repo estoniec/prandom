@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lib.h"
+#include "Galois_Field_256.h"
 #include "prandom.h"
 
 #define NUM_BYTES 10

@@ -31,7 +31,7 @@
 #include <linux/slab.h>
 #include <linux/uaccess.h>
 
-#include "lib.h"
+#include "Galois_Field_256.h"
 #include "prandom.h"
 
 #define DEVICE_NAME "gfrandom"
