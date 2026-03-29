@@ -103,6 +103,53 @@ static int test2_without_seed(void)
     return 0;
 }
 
+// тест на равномерность чисел
+static int test3_chi_squared(void)
+{
+    int      TEST_SIZE = 1024 * 1024;
+    GF256_t  coeff[POLY_DEGREE];
+    GF256_t* data = malloc(TEST_SIZE);
+    if (!data)
+    {
+        printf("failed to allocate memory\n");
+        return -1;
+    }
+    if (read_file("assets/coeff_file.bin", coeff, POLY_DEGREE) != 0)
+    {
+        printf("failed to read coeff_file\n");
+        free(data);
+        return -1;
+    }
+    struct gf256_gprn gprn;
+    gf256_gprn_init_t(&gprn, coeff, NULL);
+    gf256_gprn_generate(&gprn, TEST_SIZE, data);
+    int observed[256] = {0};
+    for (size_t i = 0; i < TEST_SIZE; i++)
+    {
+        observed[data[i]]++;
+    }
+
+    double expected = TEST_SIZE / 256.0;
+    double chi_sq   = 0.0;
+    for (int i = 0; i < 256; i++)
+    {
+        double diff = observed[i] - expected;
+        chi_sq += (diff * diff) / expected;
+    }
+    free(data);
+    double chi_critical = 293.0;
+    if (chi_sq < chi_critical)
+    {
+        printf("✅ Chi-squared test passed (χ² = %.2f < %.2f)\n", chi_sq, chi_critical);
+        return 0;
+    }
+    else
+    {
+        printf("❌ Chi-squared test failed (χ² = %.2f >= %.2f)\n", chi_sq, chi_critical);
+        return -1;
+    }
+}
+
 int main(void)
 {
     int result = 0;
@@ -118,6 +165,13 @@ int main(void)
     if (result != 0)
     {
         printf("test2 failed\n");
+        return 1;
+    }
+
+    result = test3_chi_squared();
+    if (result != 0)
+    {
+        printf("test3 failed\n");
         return 1;
     }
 
