@@ -1,81 +1,81 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
-/*
- * prandom – misc-драйвер, предоставляющий случайные данные, аналогично /dev/urandom
- *
- * Copyright (C) 2025 Makar Lill
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
+#include "prandom.h"
 
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/fs.h>
-#include <linux/miscdevice.h>
-#include <linux/uaccess.h>
+#include "Galois_Field_256.h"
 
-#define DEVICE_NAME "prandom"
-
-static ssize_t misc_read(struct file *filp, char __user *buf, size_t length,
-                         loff_t *f_pos)
+void gf256_gprn_init_t(struct gf256_gprn* gprn, GF256_t* coeff_data, GF256_t* seed_data)
 {
-    u8 kernel_buf[256];
-    size_t bytes_to_read = length;
-    size_t chunk;
+    if (!gprn)
+        return;
 
-    while (bytes_to_read > 0) {
-        chunk = min(bytes_to_read, sizeof(kernel_buf));
-        get_random_bytes(kernel_buf, chunk);
+    int i;
 
-        if (copy_to_user(buf, kernel_buf, chunk))
-            return -EFAULT;
-
-        buf += chunk;
-        bytes_to_read -= chunk;
+    if (coeff_data)
+    {
+        for (i = 0; i < POLY_DEGREE; i++)
+        {
+            gprn->coeff[i] = coeff_data[i];
+        }
+    }
+    else
+    {
+        for (i = 0; i < POLY_DEGREE; i++)
+        {
+            gprn->coeff[i] = (GF256_t)(i % 256);
+        }
     }
 
-    return length;
-}
-
-static const struct file_operations fops = {
-    .owner = THIS_MODULE,
-    .read = misc_read,
-};
-
-static struct miscdevice prandom_misc = {
-    .minor = MISC_DYNAMIC_MINOR,
-    .name = DEVICE_NAME,
-    .fops = &fops,
-};
-
-static int __init misc_init(void)
-{
-    int err = misc_register(&prandom_misc);
-    if (err != 0) {
-        return err;
+    if (seed_data)
+    {
+        for (i = 0; i < POLY_DEGREE; i++)
+        {
+            gprn->t[i] = seed_data[i];
+        }
+    }
+    else
+    {
+        memset(gprn->t, 0, POLY_DEGREE);
+        for (i = 0; i < ARRAY_SIZE(GF256_DEGREES_AUTO); i++)
+        {
+            gprn->t[GF256_DEGREES_AUTO[i]] = GF256_ONE;
+        }
     }
 
-    return 0;
+    gprn->index = 0;
 }
 
-static void __exit misc_exit(void)
+GF256_t gf256_gprn_next(struct gf256_gprn* gprn)
 {
-    misc_deregister(&prandom_misc);
+    if (!gprn)
+        return 0;
+
+    GF256_t new_byte = 0;
+    int     idx;
+    int     i;
+
+    for (i = 0; i < POLY_DEGREE; i++)
+    {
+        if (gprn->t[i] != 0)
+        {
+            idx      = (gprn->index + i) % POLY_DEGREE;
+            new_byte = GF256_Add(new_byte, GF256_Mul(gprn->t[i], gprn->coeff[idx]));
+        }
+    }
+
+    // "circular" array
+    gprn->coeff[gprn->index] = new_byte;
+    gprn->index              = (gprn->index + 1) % POLY_DEGREE;
+
+    return new_byte;
 }
 
-module_init(misc_init);
-module_exit(misc_exit);
+void gf256_gprn_generate(struct gf256_gprn* gprn, size_t count, GF256_t* output)
+{
+    if (!gprn || !output || count == 0)
+        return;
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Makar Lill");
-MODULE_DESCRIPTION("Analogue of /dev/urandom");
+    size_t i;
+    for (i = 0; i < count; i++)
+    {
+        output[i] = gf256_gprn_next(gprn);
+    }
+}
