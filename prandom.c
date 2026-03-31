@@ -54,16 +54,13 @@ GF256_t gf256_gprn_next(struct gf256_gprn* gprn)
 
     for (i = 0; i < POLY_DEGREE; i++)
     {
-        if (gprn->t[i] != 0)
-        {
-            idx      = (gprn->index + i) % POLY_DEGREE;
-            new_byte = GF256_Add(new_byte, GF256_Mul(gprn->t[i], gprn->coeff[idx]));
-        }
+        idx      = (gprn->index + i) % POLY_DEGREE;
+        new_byte = GF256_Add(new_byte, GF256_Mul(gprn->coeff[i], gprn->t[idx]));
     }
 
     // "circular" array
-    gprn->coeff[gprn->index] = new_byte;
-    gprn->index              = (gprn->index + 1) % POLY_DEGREE;
+    gprn->t[gprn->index] = new_byte;
+    gprn->index          = (gprn->index + 1) % POLY_DEGREE;
 
     return new_byte;
 }
