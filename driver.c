@@ -110,9 +110,9 @@ static int gprn_init_t(struct gf256_gprn* gprn)
 
 static ssize_t misc_read(struct file* filp, char __user* buf, size_t length, loff_t* f_pos)
 {
-    GF256_t kernel_buf[1024];
-    size_t  bytes_to_read = length;
-    size_t  chunk;
+    static GF256_t kernel_buf[1024];
+    size_t         bytes_to_read = length;
+    size_t         chunk;
 
     if (!global_gprn)
         return -ENODEV;
